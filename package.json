@@ -82,6 +82,7 @@
     "tailwindcss-animate": "^1.0.7",
     "util": "latest",
     "vaul": "^0.9.9",
+    "wait-on": "^9.0.1",
     "zod": "3.25.67"
   },
   "devDependencies": {

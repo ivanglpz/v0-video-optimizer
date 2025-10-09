@@ -6,14 +6,14 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: "export",
   images: {
     unoptimized: true,
   },
   // IMPORTANTE: sin trailing slash
-  trailingSlash: true,
+  trailingSlash: false,
+
   // Si usas tailwind o CSS modules, asegúrate de esto:
-  assetPrefix: "",
+  output: "export",
 };
 
 export default nextConfig;
