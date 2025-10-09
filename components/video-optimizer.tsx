@@ -1,129 +1,153 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Progress } from "@/components/ui/progress"
-import { Upload, Video, Settings, Download, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState, useRef } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
+import {
+  Upload,
+  Video,
+  Settings,
+  Download,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VideoConfig {
-  resolution: string
-  codec: string
-  quality: number
-  format: string
-  fps: string
-  bitrate: string
+  resolution: string;
+  codec: string;
+  quality: number;
+  format: string;
+  fps: string;
+  bitrate: string;
 }
 
 export default function VideoOptimizer() {
-  const [file, setFile] = useState<File | null>(null)
+  const [file, setFile] = useState<File | null>(null);
   const [config, setConfig] = useState<VideoConfig>({
     resolution: "1920x1080",
     codec: "libx264",
-    quality: 23,
+    quality: 25,
     format: "mp4",
-    fps: "30",
+    fps: "60",
     bitrate: "auto",
-  })
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState<"idle" | "processing" | "success" | "error">("idle")
-  const [errorMessage, setErrorMessage] = useState("")
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<
+    "idle" | "processing" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
+    const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type.startsWith("video/")) {
-      setFile(selectedFile)
-      setStatus("idle")
-      setProgress(0)
+      setFile(selectedFile);
+      setStatus("idle");
+      setProgress(0);
     }
-  }
+  };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    const droppedFile = e.dataTransfer.files[0]
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && droppedFile.type.startsWith("video/")) {
-      setFile(droppedFile)
-      setStatus("idle")
-      setProgress(0)
+      setFile(droppedFile);
+      setStatus("idle");
+      setProgress(0);
     }
-  }
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-  }
+    e.preventDefault();
+  };
 
   const handleOptimize = async () => {
-    if (!file) return
+    if (!file) return;
 
-    setIsProcessing(true)
-    setStatus("processing")
-    setProgress(0)
-    setErrorMessage("")
+    setIsProcessing(true);
+    setStatus("processing");
+    setProgress(0);
+    setErrorMessage("");
 
     try {
-      const formData = new FormData()
-      formData.append("video", file)
-      formData.append("config", JSON.stringify(config))
+      const formData = new FormData();
+      formData.append("video", file);
+      formData.append("config", JSON.stringify(config));
 
       const response = await fetch("/api/optimize-video", {
         method: "POST",
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Error al procesar el video")
+        throw new Error("Error al procesar el video");
       }
 
       // Simular progreso (en producción, esto vendría del servidor)
       const interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 95) {
-            clearInterval(interval)
-            return 95
+            clearInterval(interval);
+            return 95;
           }
-          return prev + 5
-        })
-      }, 500)
+          return prev + 5;
+        });
+      }, 500);
 
-      const blob = await response.blob()
-      clearInterval(interval)
-      setProgress(100)
+      const blob = await response.blob();
+      clearInterval(interval);
+      setProgress(100);
 
       // Descargar el video optimizado
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `optimized_${file.name.split(".")[0]}.${config.format}`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `optimized_${file.name.split(".")[0]}.${config.format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-      setStatus("success")
+      setStatus("success");
     } catch (error) {
-      console.error("[v0] Error optimizing video:", error)
-      setStatus("error")
-      setErrorMessage(error instanceof Error ? error.message : "Error desconocido")
+      console.error("[v0] Error optimizing video:", error);
+      setStatus("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error desconocido"
+      );
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
-  }
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -134,7 +158,9 @@ export default function VideoOptimizer() {
             <Upload className="h-5 w-5" />
             Subir Video
           </CardTitle>
-          <CardDescription>Selecciona o arrastra un archivo de video</CardDescription>
+          <CardDescription>
+            Selecciona o arrastra un archivo de video
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div
@@ -147,9 +173,19 @@ export default function VideoOptimizer() {
             <p className="text-center text-sm text-muted-foreground">
               {file ? file.name : "Haz clic o arrastra un video aquí"}
             </p>
-            {file && <p className="mt-2 text-xs text-muted-foreground">{formatFileSize(file.size)}</p>}
+            {file && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {formatFileSize(file.size)}
+              </p>
+            )}
           </div>
-          <input ref={fileInputRef} type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
 
           {status === "processing" && (
             <div className="space-y-2">
@@ -173,7 +209,9 @@ export default function VideoOptimizer() {
           {status === "error" && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage || "Error al procesar el video"}</AlertDescription>
+              <AlertDescription>
+                {errorMessage || "Error al procesar el video"}
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>
@@ -186,14 +224,21 @@ export default function VideoOptimizer() {
             <Settings className="h-5 w-5" />
             Configuración de Optimización
           </CardTitle>
-          <CardDescription>Ajusta los parámetros de ffmpeg para optimizar tu video</CardDescription>
+          <CardDescription>
+            Ajusta los parámetros de ffmpeg para optimizar tu video
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Resolution */}
             <div className="space-y-2">
               <Label htmlFor="resolution">Resolución</Label>
-              <Select value={config.resolution} onValueChange={(value) => setConfig({ ...config, resolution: value })}>
+              <Select
+                value={config.resolution}
+                onValueChange={(value) =>
+                  setConfig({ ...config, resolution: value })
+                }
+              >
                 <SelectTrigger id="resolution">
                   <SelectValue />
                 </SelectTrigger>
@@ -211,7 +256,12 @@ export default function VideoOptimizer() {
             {/* Codec */}
             <div className="space-y-2">
               <Label htmlFor="codec">Codec</Label>
-              <Select value={config.codec} onValueChange={(value) => setConfig({ ...config, codec: value })}>
+              <Select
+                value={config.codec}
+                onValueChange={(value) =>
+                  setConfig({ ...config, codec: value })
+                }
+              >
                 <SelectTrigger id="codec">
                   <SelectValue />
                 </SelectTrigger>
@@ -227,7 +277,12 @@ export default function VideoOptimizer() {
             {/* Format */}
             <div className="space-y-2">
               <Label htmlFor="format">Formato de Salida</Label>
-              <Select value={config.format} onValueChange={(value) => setConfig({ ...config, format: value })}>
+              <Select
+                value={config.format}
+                onValueChange={(value) =>
+                  setConfig({ ...config, format: value })
+                }
+              >
                 <SelectTrigger id="format">
                   <SelectValue />
                 </SelectTrigger>
@@ -244,7 +299,10 @@ export default function VideoOptimizer() {
             {/* FPS */}
             <div className="space-y-2">
               <Label htmlFor="fps">FPS (Cuadros por segundo)</Label>
-              <Select value={config.fps} onValueChange={(value) => setConfig({ ...config, fps: value })}>
+              <Select
+                value={config.fps}
+                onValueChange={(value) => setConfig({ ...config, fps: value })}
+              >
                 <SelectTrigger id="fps">
                   <SelectValue />
                 </SelectTrigger>
@@ -260,7 +318,12 @@ export default function VideoOptimizer() {
             {/* Bitrate */}
             <div className="space-y-2">
               <Label htmlFor="bitrate">Bitrate</Label>
-              <Select value={config.bitrate} onValueChange={(value) => setConfig({ ...config, bitrate: value })}>
+              <Select
+                value={config.bitrate}
+                onValueChange={(value) =>
+                  setConfig({ ...config, bitrate: value })
+                }
+              >
                 <SelectTrigger id="bitrate">
                   <SelectValue />
                 </SelectTrigger>
@@ -281,7 +344,9 @@ export default function VideoOptimizer() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label htmlFor="quality">Calidad (CRF)</Label>
-              <span className="font-mono text-sm text-muted-foreground">{config.quality}</span>
+              <span className="font-mono text-sm text-muted-foreground">
+                {config.quality}
+              </span>
             </div>
             <Slider
               id="quality"
@@ -289,15 +354,24 @@ export default function VideoOptimizer() {
               max={51}
               step={1}
               value={[config.quality]}
-              onValueChange={(value) => setConfig({ ...config, quality: value[0] })}
+              onValueChange={(value) =>
+                setConfig({ ...config, quality: value[0] })
+              }
               className="w-full"
             />
-            <p className="text-xs text-muted-foreground">0 = Sin pérdida, 23 = Recomendado, 51 = Peor calidad</p>
+            <p className="text-xs text-muted-foreground">
+              0 = Sin pérdida, 23 = Recomendado, 51 = Peor calidad
+            </p>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
-            <Button onClick={handleOptimize} disabled={!file || isProcessing} className="flex-1" size="lg">
+            <Button
+              onClick={handleOptimize}
+              disabled={!file || isProcessing}
+              className="flex-1"
+              size="lg"
+            >
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -314,15 +388,19 @@ export default function VideoOptimizer() {
 
           {/* Info Box */}
           <div className="rounded-lg bg-muted p-4">
-            <h4 className="mb-2 text-sm font-medium text-foreground">Comando ffmpeg generado:</h4>
+            <h4 className="mb-2 text-sm font-medium text-foreground">
+              Comando ffmpeg generado:
+            </h4>
             <code className="block overflow-x-auto text-xs text-muted-foreground font-mono">
-              ffmpeg -i input.{file?.name.split(".").pop() || "mp4"} -vf scale={config.resolution.replace("x", ":")}{" "}
-              -c:v {config.codec} -crf {config.quality} -r {config.fps}{" "}
-              {config.bitrate !== "auto" ? `-b:v ${config.bitrate}` : ""} output.{config.format}
+              ffmpeg -i input.{file?.name.split(".").pop() || "mp4"} -vf scale=
+              {config.resolution.replace("x", ":")} -c:v {config.codec} -crf{" "}
+              {config.quality} -r {config.fps}{" "}
+              {config.bitrate !== "auto" ? `-b:v ${config.bitrate}` : ""}{" "}
+              output.{config.format}
             </code>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
