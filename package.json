@@ -12,8 +12,8 @@
     "start": "electron ."
   },
   "build": {
-    "appId": "com.videooptimization.app",
-    "productName": "Video Optimization Panel",
+    "appId": "com.bubble.app",
+    "productName": "bubble",
     "files": [
       "out/**/*",
       "electron/**/*",
