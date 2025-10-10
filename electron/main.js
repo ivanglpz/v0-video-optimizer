@@ -12,10 +12,11 @@ const upload = multer({ storage: multer.memoryStorage() }); // almacenar archivo
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1240,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
     },
   });
 
