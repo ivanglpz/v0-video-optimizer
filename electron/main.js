@@ -50,16 +50,42 @@ function createWindow() {
 
         await writeFile(inputPath, videoFile.buffer);
 
-        let ffmpegCommand = `ffmpeg -i "${inputPath}" -vf scale=${config.resolution.replace(
-          "x",
-          ":"
-        )} -c:v ${config.codec} -crf ${config.quality} -r ${config.fps}`;
+        let videoFilter = `scale=${config.resolution.replace("x", ":")}`;
+
+        if (config.velocity !== 1.0) {
+          videoFilter += `,setpts=${(1 / config.velocity).toFixed(2)}*PTS`;
+        }
+
+        let ffmpegCommand = `ffmpeg -i "${inputPath}" -vf ${videoFilter} -c:v ${config.codec} -crf ${config.quality} -r ${config.fps}`;
 
         if (config.bitrate !== "auto") {
           ffmpegCommand += ` -b:v ${config.bitrate}`;
         }
 
-        ffmpegCommand += ` -c:a aac -b:a 128k "${outputPath}"`;
+        if (config.velocity !== 1.0) {
+          let audioFilter = "";
+          let remainingSpeed = config.velocity;
+
+          while (remainingSpeed > 2.0) {
+            audioFilter += audioFilter ? ",atempo=2.0" : "atempo=2.0";
+            remainingSpeed /= 2.0;
+          }
+
+          while (remainingSpeed < 0.5) {
+            audioFilter += audioFilter ? ",atempo=0.5" : "atempo=0.5";
+            remainingSpeed /= 0.5;
+          }
+
+          audioFilter += audioFilter
+            ? `,atempo=${remainingSpeed.toFixed(2)}`
+            : `atempo=${remainingSpeed.toFixed(2)}`;
+
+          ffmpegCommand += ` -af ${audioFilter} -c:a aac -b:a 128k`;
+        } else {
+          ffmpegCommand += ` -c:a aac -b:a 128k`;
+        }
+
+        ffmpegCommand += ` "${outputPath}"`;
 
         try {
           const { stdout, stderr } = await execAsync(ffmpegCommand);

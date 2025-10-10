@@ -2,7 +2,8 @@
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -20,17 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Progress } from "@/components/ui/progress";
 import {
-  Upload,
-  Video,
-  Settings,
+  AlertCircle,
+  CheckCircle2,
   Download,
   Loader2,
-  CheckCircle2,
-  AlertCircle,
+  Settings,
+  Upload,
+  Video,
 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRef, useState } from "react";
 
 interface VideoConfig {
   resolution: string;
@@ -39,6 +39,7 @@ interface VideoConfig {
   format: string;
   fps: string;
   bitrate: string;
+  velocity: number;
 }
 
 export default function VideoOptimizer() {
@@ -50,6 +51,7 @@ export default function VideoOptimizer() {
     format: "mp4",
     fps: "60",
     bitrate: "auto",
+    velocity: 1.0,
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -340,6 +342,30 @@ export default function VideoOptimizer() {
             </div>
           </div>
 
+          {/* Velocity Slider */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="velocity">Velocidad del Video</Label>
+              <span className="font-mono text-sm text-muted-foreground">
+                {config.velocity}x
+              </span>
+            </div>
+            <Slider
+              id="velocity"
+              min={0.25}
+              max={4}
+              step={0.25}
+              value={[config.velocity]}
+              onValueChange={(value) =>
+                setConfig({ ...config, velocity: value[0] })
+              }
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              0.25x = Muy lento, 1.0x = Normal, 4.0x = Muy rápido
+            </p>
+          </div>
+
           {/* Quality Slider */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -393,9 +419,13 @@ export default function VideoOptimizer() {
             </h4>
             <code className="block overflow-x-auto text-xs text-muted-foreground font-mono">
               ffmpeg -i input.{file?.name.split(".").pop() || "mp4"} -vf scale=
-              {config.resolution.replace("x", ":")} -c:v {config.codec} -crf{" "}
-              {config.quality} -r {config.fps}{" "}
-              {config.bitrate !== "auto" ? `-b:v ${config.bitrate}` : ""}{" "}
+              {config.resolution.replace("x", ":")}
+              {config.velocity !== 1.0
+                ? `,setpts=${(1 / config.velocity).toFixed(2)}*PTS`
+                : ""}
+              -c:v {config.codec} -crf {config.quality} -r {config.fps}{" "}
+              {config.bitrate !== "auto" ? `-b:v ${config.bitrate}` : ""}
+              {config.velocity !== 1.0 ? `-af atempo=${config.velocity}` : ""}
               output.{config.format}
             </code>
           </div>
