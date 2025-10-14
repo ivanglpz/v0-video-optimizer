@@ -14,11 +14,21 @@ const upload = multer({ storage: multer.memoryStorage() });
 const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
 
 function getFFmpegPath() {
+  // 1. Prioriza ffmpeg del sistema en macOS
+  const systemFFmpeg = "/opt/homebrew/bin/ffmpeg";
+  if (existsSync(systemFFmpeg)) {
+    console.log("✅ Using system ffmpeg:", systemFFmpeg);
+    return systemFFmpeg;
+  }
+
+  // 2. Si está en modo desarrollo, usa el binario de node_modules
   if (!app.isPackaged) {
+    console.log("✅ Using development ffmpeg:", ffmpegInstaller.path);
     return ffmpegInstaller.path;
   }
 
-  const ffmpegPath = path.join(
+  // 3. Fallback al binario empaquetado
+  const packagedFFmpeg = path.join(
     process.resourcesPath,
     "app.asar.unpacked",
     "node_modules",
@@ -27,11 +37,8 @@ function getFFmpegPath() {
     "dist",
     "ffmpeg"
   );
-
-  console.log("📍 FFmpeg path:", ffmpegPath);
-  console.log("✓ Existe:", existsSync(ffmpegPath));
-
-  return ffmpegPath;
+  console.log("✅ Using packaged ffmpeg:", packagedFFmpeg);
+  return packagedFFmpeg;
 }
 
 // Función para asegurar que ffmpeg tiene permisos de ejecución
