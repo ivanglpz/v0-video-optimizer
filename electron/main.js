@@ -12,6 +12,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
+      nodeIntegration: true,
     },
   });
 
@@ -60,15 +61,29 @@ ipcMain.handle("optimize-video", async (_, fileBuffer, config) => {
   try {
     await execAsync(ffmpegCommand);
   } catch (err) {
-    await unlink(inputPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
+    await unlink(inputPath);
+    await unlink(outputPath);
     throw new Error("Error ejecutando FFmpeg: " + err.message);
   }
 
   const output = await readFile(outputPath);
-  await unlink(inputPath).catch(() => {});
-  await unlink(outputPath).catch(() => {});
+  await unlink(inputPath);
+  await unlink(outputPath);
   return output;
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
