@@ -1,9 +1,9 @@
-import { exec } from "child_process";
-import { app, BrowserWindow, ipcMain } from "electron";
-import { readFile, unlink, writeFile } from "fs/promises";
-import { tmpdir } from "os";
-import path from "path";
-import { promisify } from "util";
+const { exec } = require("child_process");
+const { app, BrowserWindow, ipcMain } = require("electron");
+const { readFile, unlink, writeFile } = require("fs/promises");
+const { tmpdir } = require("os");
+const path = require("path");
+const { promisify } = require("util");
 
 const execAsync = promisify(exec);
 
@@ -95,7 +95,6 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
-      nodeIntegration: true,
     },
   });
 
