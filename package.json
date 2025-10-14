@@ -17,11 +17,7 @@
     "files": [
       "out/**/*",
       "electron/**/*",
-      "package.json",
-      "dist/**/*"
-    ],
-    "asarUnpack": [
-      "node_modules/@ffmpeg-installer"
+      "package.json"
     ],
     "directories": {
       "output": "dist"
@@ -32,7 +28,6 @@
     }
   },
   "dependencies": {
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",

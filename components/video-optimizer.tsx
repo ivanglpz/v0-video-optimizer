@@ -93,47 +93,28 @@ export default function VideoOptimizer() {
     setErrorMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("video", file);
-      formData.append("config", JSON.stringify(config));
-
-      const response = await fetch("/api/optimize-video", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al procesar el video");
-      }
-
-      // Simular progreso (en producción, esto vendría del servidor)
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 95) {
-            clearInterval(interval);
-            return 95;
-          }
-          return prev + 5;
-        });
-      }, 500);
-
-      const blob = await response.blob();
-      clearInterval(interval);
-      setProgress(100);
+      const arrayBuffer = await file.arrayBuffer();
+      const optimizedBuffer = await window.electronAPI.optimizeVideo(
+        arrayBuffer,
+        config
+      );
 
       // Descargar el video optimizado
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(
+        new Blob([optimizedBuffer], { type: `video/${config.format}` })
+      );
       const a = document.createElement("a");
       a.href = url;
       a.download = `optimized_${file.name.split(".")[0]}.${config.format}`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
+      setProgress(100);
       setStatus("success");
     } catch (error) {
-      console.error("[v0] Error optimizing video:", error);
+      console.error("Error optimizing video:", error);
       setStatus("error");
       setErrorMessage(
         error instanceof Error ? error.message : "Error desconocido"
