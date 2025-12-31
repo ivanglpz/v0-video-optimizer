@@ -99,7 +99,6 @@ export default function VideoOptimizer() {
         config
       );
 
-      // Descargar el video optimizado
       const url = URL.createObjectURL(
         new Blob([optimizedBuffer], { type: `video/${config.format}` })
       );
@@ -116,9 +115,7 @@ export default function VideoOptimizer() {
     } catch (error) {
       console.error("Error optimizing video:", error);
       setStatus("error");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Error desconocido"
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error");
     } finally {
       setIsProcessing(false);
     }
@@ -139,10 +136,10 @@ export default function VideoOptimizer() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
-            Subir Video
+            Upload Video
           </CardTitle>
           <CardDescription>
-            Selecciona o arrastra un archivo de video
+            Select or drag and drop a video file
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -154,7 +151,7 @@ export default function VideoOptimizer() {
           >
             <Video className="mb-4 h-12 w-12 text-muted-foreground" />
             <p className="text-center text-sm text-muted-foreground">
-              {file ? file.name : "Haz clic o arrastra un video aquí"}
+              {file ? file.name : "Click or drag a video here"}
             </p>
             {file && (
               <p className="mt-2 text-xs text-muted-foreground">
@@ -173,7 +170,7 @@ export default function VideoOptimizer() {
           {status === "processing" && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Procesando...</span>
+                <span className="text-muted-foreground">Processing...</span>
                 <span className="font-mono text-foreground">{progress}%</span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -184,7 +181,7 @@ export default function VideoOptimizer() {
             <Alert className="border-primary/50 bg-primary/10">
               <CheckCircle2 className="h-4 w-4 text-primary" />
               <AlertDescription className="text-foreground">
-                Video optimizado y descargado exitosamente
+                Video optimized and downloaded successfully
               </AlertDescription>
             </Alert>
           )}
@@ -193,7 +190,7 @@ export default function VideoOptimizer() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {errorMessage || "Error al procesar el video"}
+                {errorMessage || "Error processing the video"}
               </AlertDescription>
             </Alert>
           )}
@@ -205,17 +202,17 @@ export default function VideoOptimizer() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Configuración de Optimización
+            Optimization Settings
           </CardTitle>
           <CardDescription>
-            Ajusta los parámetros de ffmpeg para optimizar tu video
+            Adjust ffmpeg parameters to optimize your video
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Resolution */}
             <div className="space-y-2">
-              <Label htmlFor="resolution">Resolución</Label>
+              <Label htmlFor="resolution">Resolution</Label>
               <Select
                 value={config.resolution}
                 onValueChange={(value) =>
@@ -259,7 +256,7 @@ export default function VideoOptimizer() {
 
             {/* Format */}
             <div className="space-y-2">
-              <Label htmlFor="format">Formato de Salida</Label>
+              <Label htmlFor="format">Output Format</Label>
               <Select
                 value={config.format}
                 onValueChange={(value) =>
@@ -281,7 +278,7 @@ export default function VideoOptimizer() {
 
             {/* FPS */}
             <div className="space-y-2">
-              <Label htmlFor="fps">FPS (Cuadros por segundo)</Label>
+              <Label htmlFor="fps">FPS (Frames per second)</Label>
               <Select
                 value={config.fps}
                 onValueChange={(value) => setConfig({ ...config, fps: value })}
@@ -311,7 +308,7 @@ export default function VideoOptimizer() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="auto">Automático</SelectItem>
+                  <SelectItem value="auto">Automatic</SelectItem>
                   <SelectItem value="500k">500 kbps</SelectItem>
                   <SelectItem value="1M">1 Mbps</SelectItem>
                   <SelectItem value="2M">2 Mbps</SelectItem>
@@ -326,7 +323,7 @@ export default function VideoOptimizer() {
           {/* Velocity Slider */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="velocity">Velocidad del Video</Label>
+              <Label htmlFor="velocity">Video Speed</Label>
               <span className="font-mono text-sm text-muted-foreground">
                 {config.velocity}x
               </span>
@@ -343,14 +340,14 @@ export default function VideoOptimizer() {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              0.25x = Muy lento, 1.0x = Normal, 4.0x = Muy rápido
+              0.25x = Very slow, 1.0x = Normal, 4.0x = Very fast
             </p>
           </div>
 
           {/* Quality Slider */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="quality">Calidad (CRF)</Label>
+              <Label htmlFor="quality">Quality (CRF)</Label>
               <span className="font-mono text-sm text-muted-foreground">
                 {config.quality}
               </span>
@@ -367,7 +364,7 @@ export default function VideoOptimizer() {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              0 = Sin pérdida, 23 = Recomendado, 51 = Peor calidad
+              0 = Lossless, 23 = Recommended, 51 = Worst quality
             </p>
           </div>
 
@@ -382,12 +379,12 @@ export default function VideoOptimizer() {
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Procesando...
+                  Processing...
                 </>
               ) : (
                 <>
                   <Download className="mr-2 h-4 w-4" />
-                  Optimizar Video
+                  Optimize Video
                 </>
               )}
             </Button>
@@ -396,7 +393,7 @@ export default function VideoOptimizer() {
           {/* Info Box */}
           <div className="rounded-lg bg-muted p-4">
             <h4 className="mb-2 text-sm font-medium text-foreground">
-              Comando ffmpeg generado:
+              Generated ffmpeg command:
             </h4>
             <code className="block overflow-x-auto text-xs text-muted-foreground font-mono">
               ffmpeg -i input.{file?.name.split(".").pop() || "mp4"} -vf scale=
